@@ -1,19 +1,43 @@
 void main(List<String> arguments) {
   /// The input formatted as a matrix.
-  final inputMatrix = [
+  final inputMatrix3x3 = [
     ['.', '.', '*'],
     ['.', '.', '.'],
     ['.', '*', '.'],
   ];
 
+  final inputMatrix4x4 = [
+    ['.', '.', '*', '.'],
+    ['.', '.', '.', '*'],
+    ['.', '*', '.', '.'],
+    ['.', '*', '.', '.'],
+  ];
+
+  /// These variables get assigned values by the countRowsAndColumns() function.
+  /// They store how many columns and how many rows the playing field has.
+  int rowsCount;
+  int columnsCount;
+
+
   /// This matrix will be modified to give the desired input.
   /// The items are dynamic, so that '*' Strings marking the mines can
   /// overwrite the integer values.
-  List<List<dynamic>> outputMatrix = [
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-  ];
+  List<List<dynamic>> outputMatrix;
+
+  /// Counts the number of rows and columns of the matrix. Assumes that
+  /// all rows have the same number of columns.
+  void countRowsAndColumns(List<List> inputMatrix) {
+    rowsCount = inputMatrix.length;
+    columnsCount = inputMatrix[0].length;
+  }
+
+  void generateOutputMatrix(rowsCount, columnsCount) {
+
+    outputMatrix = List.empty(growable: true);
+    for (var i = 0; i < rowsCount; i++){
+        outputMatrix.add(List.filled(columnsCount, 0));
+    }
+  }
 
   /// Takes the coordinates of a field, marks field as a mine,
   /// then adds 1 to the value of all existing neighbouring fields
@@ -23,14 +47,15 @@ void main(List<String> arguments) {
     /// Marks the location of the mine in the output matrix.
     outputMatrix[i][j] = '*';
 
-    /// Iterates through the 3x3 field that has the argument coordinates
-    /// in the middle.
+    /// Iterates through the 3x3 area that has the argument coordinates
+    /// in the middle. This area contains all the neighbouring fields.
     for (var k = -1; k < 2; k++) {
       for (var l = -1; l < 2; l++) {
         /// Checks if the coordinates point to an existing field,
         /// and if it is of type integer.
         /// Skips the middle field, because it is now a String.
-        if ([0,1,2].contains(i+k) && [0,1,2].contains(j+l)) {
+        if ((i+k >= 0 && i+k < rowsCount) &&
+            (j+l >= 0 && j+l < columnsCount)) {
           if (outputMatrix[i+k][j+l] is int) {
             outputMatrix[i+k][j+l]++;
           }
@@ -40,10 +65,18 @@ void main(List<String> arguments) {
   }
 
   List mineSweeper(inputMatrix) {
+    /// Counts the rows and columns of the input matrix and
+    /// writes them in the global rowsCount and columnsCount variables.
+    countRowsAndColumns(inputMatrix);
+
+    generateOutputMatrix(rowsCount, columnsCount);
+
+
+
     /// Iterates through input matrix to find mines and modifies
     /// the output matrix accordingly.
-    for (var i = 0; i < 3; i++) {
-      for(var j = 0; j < 3; j++) {
+    for (var i = 0; i < rowsCount; i++) {
+      for(var j = 0; j < columnsCount; j++) {
         if (inputMatrix[i][j] == '*') {
           add1ToNeighbors(i, j);
         }
@@ -64,7 +97,7 @@ void main(List<String> arguments) {
   }
 
   /// Calls the mineSweeper function to get the output.
-  var output = mineSweeper(inputMatrix);
+  var output = mineSweeper(inputMatrix4x4);
 
   /// Prints output to the console.
   printMatrixToConsole(output);
